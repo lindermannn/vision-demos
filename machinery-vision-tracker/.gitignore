@@ -1,0 +1,31 @@
+# Datos y artefactos locales
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.zip
+*.sqlite3
+*.db
+*.bak
+*.log
+.env
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+output/
+outputs/
+runs/
+cache/
+wandb/
+
+# Rutas y archivos específicos de una máquina
+*label_studio.sqlite3*
+*secrets*
+*credentials*
+*token*
+*api_key*
