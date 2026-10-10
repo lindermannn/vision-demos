@@ -24,7 +24,7 @@ Sample output, 20 reps with grip changes (horizontal layout): [samples/pullups-2
 
 2. Install FFmpeg and make sure `ffmpeg` and `ffprobe` are on your PATH.
 
-3. Put a clip in `data/input/`. Film from the front or back, with the whole body and the bar in frame. The first run extracts the pose and caches it in `data/cache/`.
+3. Put a clip in `data/input/`. Film from the front, the back or the side, with the whole body and the bar in frame. So far, one side-view clip has been checked (2 reps); side views need more tests. The first run extracts the pose and caches it in `data/cache/`.
 
 4. Optional: build a calibration from reps you know are valid. Describe them in a JSON file and run:
 
