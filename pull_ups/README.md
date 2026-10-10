@@ -10,6 +10,8 @@ Run the commands below from this folder (`pull_ups`).
 
 Sample video (20 reps, horizontal layout): [watch on YouTube](https://www.youtube.com/watch?v=HACXz5mu7Yk)
 
+Side-view example (2 reps, the only side-view clip checked so far): [watch on YouTube](https://youtu.be/L_C7bp-_LhI)
+
 Details and limits are in [how_it_works.md](how_it_works.md).
 
 Sample output, 20 reps with grip changes (horizontal layout): [samples/pullups-20-horizontal.mp4](samples/pullups-20-horizontal.mp4)
