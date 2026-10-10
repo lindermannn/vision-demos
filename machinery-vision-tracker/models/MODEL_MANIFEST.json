@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "model_id": "depth-anything/Depth-Anything-V2-Small-hf",
+  "revision": "5426e4f0f36572d16453bbda7a8389317b1bef99",
+  "license_declared": "Apache-2.0",
+  "purpose": "relative-depth prior for method-2 berm profile extraction",
+  "weight_file": "model.safetensors",
+  "weight_size_bytes": 99173660,
+  "weight_sha256": "3152477ce0d8d6978d76b995120de97cb5b928701fd0f817769f59e249a16b70",
+  "source": "https://huggingface.co/depth-anything/Depth-Anything-V2-Small-hf",
+  "files": {
+    ".gitattributes": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+    "README.md": "319566441daaac0c5ed83e75a8fd19bae0863f3275e23f147c06fe0906edf6fb",
+    "config.json": "c56698d3643dde1f83ea2212759e6b31a22b8f827246a36dd007ee8a22b3ff75",
+    "model.safetensors": "3152477ce0d8d6978d76b995120de97cb5b928701fd0f817769f59e249a16b70",
+    "preprocessor_config.json": "d41175c0d889477ca8fc67191e540faef14baf6275157b3fdecf78469e6bbf84"
+  },
+  "validation_date": "2026-09-06",
+  "redistribution": "weight is not committed; fetch only during development or image build, never docker run"
+}

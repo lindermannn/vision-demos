@@ -1,0 +1,131 @@
+schema_version: 1
+
+runtime:
+  device: auto
+  input_size: 640
+  fail_fast: false
+
+scale:
+  source: assumed_pixel_ratio
+  pixels_per_meter: 5.0
+  label: estimated_meters
+
+proximity:
+  red_below_m: 10.0
+  yellow_at_or_below_m: 20.0
+  scale_mode: vehicle_reference
+  reference_vehicle_height_m: 5.0
+
+scene:
+  reset_on_cut: true
+  histogram_threshold: 0.62
+  mean_difference_threshold: 0.20
+  night_below_mean: 55.0
+  day_above_mean: 80.0
+  cooldown_frames: 6
+  drift_lag_frames: 24
+  drift_correlation: 0.25
+  drift_frames: 3
+
+segmentation:
+  process_width: 640
+  roi_x: [0.04, 0.96]
+  crest_y: [0.40, 0.73]
+  base_offset_y: [0.012, 0.16]
+  # Validator range must cover the extractor search range base_offset_y
+  # [0.025, 0.16]: 0.09 * (1 +/- 0.8) = [0.018, 0.162] of the frame height.
+  expected_height_y: 0.09
+  max_expected_height_deviation_ratio: 0.8
+  min_confidence: 0.12
+  min_free_profile_fraction: 0.38
+  max_interpolation_gap_ratio: 0.48
+  max_temporal_height_change_ratio: 0.35
+  max_height_iqr_ratio: 0.70
+  occlusion_margin_ratio: 0.012
+  height_ema_alpha: 0.20
+  minimum_valid_frames: 3
+  reference_expiry_frames: 90
+  recovery_frames: 2
+  low_light_registration_tolerance_frames: 3
+  # A remembered berm survives one second of incompatible daylight evidence
+  # as historical before it is dropped and a new reference may bootstrap.
+  reconfirmation_failure_frames: 24
+  # Daylight frames after a dusk/dawn ramp during which no reference is seeded.
+  bootstrap_settle_frames: 12
+  min_pair_contrast: 0.035
+  min_paired_support_fraction: 0.28
+  min_contiguous_support_fraction: 0.16
+  observed_coverage_fraction: 0.55
+  min_current_support_for_estimate: 0.20
+  profile_ema_alpha: 0.12
+  max_profile_shift_ratio: 0.035
+  # Camera motion accepted per frame from static structure; larger shifts are
+  # object motion or a cut and are never applied to the remembered profile.
+  max_registration_shift_ratio: 0.01
+  max_profile_residual_ratio: 0.45
+  max_saturated_fraction: 0.22
+  # dark: body darker than its surroundings only; both: also a sunlit ridge.
+  ridge_polarity: both
+  # Toe = first transition below the crest whose evidence reaches this fraction
+  # of the strongest candidate (0 disables and keeps the strongest toe).
+  toe_nearest_evidence_ratio: 0.3
+
+learned:
+  model_id: depth-anything/Depth-Anything-V2-Small-hf
+  revision: 5426e4f0f36572d16453bbda7a8389317b1bef99
+  weight_sha256: 3152477ce0d8d6978d76b995120de97cb5b928701fd0f817769f59e249a16b70
+  input_size: 392
+  min_confidence: 0.16
+  device: auto
+
+detection:
+  min_area_ratio: 0.0009
+  max_area_ratio: 0.12
+  min_width_ratio: 0.025
+  min_height_ratio: 0.025
+  max_width_ratio: 0.36
+  max_height_ratio: 0.34
+  min_aspect_ratio: 1.2
+  max_aspect_ratio: 4.2
+  min_vertical_center_ratio: 0.40
+  max_vertical_center_ratio: 0.75
+  min_motion_fill: 0.08
+  min_texture_std: 6.0
+  max_night_bright_fraction: 0.42
+  min_confidence: 0.34
+  max_detections: 10
+  warmup_frames: 3
+
+semantic_detection:
+  model_id: IDEA-Research/grounding-dino-tiny
+  revision: a2bb814dd30d776dcf7e30523b00659f4f141c71
+  weight_sha256: 1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3
+  device: auto
+  labels: [mining haul truck, bulldozer, wheel loader, dump truck]
+  box_threshold: 0.28
+  text_threshold: 0.22
+  nms_iou_threshold: 0.45
+  inference_interval: 3
+  input_short_edge: 640
+  input_long_edge: 1024
+  min_area_ratio: 0.0015
+  max_area_ratio: 0.22
+  min_width_ratio: 0.025
+  min_height_ratio: 0.025
+  max_detections: 12
+
+tracking:
+  max_center_distance_ratio: 0.065
+  min_iou: 0.02
+  velocity_alpha: 0.55
+  max_size_change_ratio: 1.8
+  max_missed_frames: 8
+  minimum_hits: 5
+
+events:
+  persistence_frames: 3
+  recovery_frames: 3
+
+output:
+  overwrite: false
+  write_raw_data: true

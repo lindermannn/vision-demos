@@ -1,0 +1,4 @@
+{
+ "Camion_Mina":{"reference_model":"CAT_793F","height_m":6.6,"length_m":13.7,"width_m":8.29,"uncertainty_fraction":0.12,"height_definition":"altura de transporte; supuesto configurable"},
+ "Bulldozer":{"reference_model":"CAT_D11","height_m":4.5,"length_m":10.9,"width_m":6.7,"body_width_m":3.2,"uncertainty_fraction":0.15,"height_definition":"hasta chimenea; supuesto configurable"}
+}
