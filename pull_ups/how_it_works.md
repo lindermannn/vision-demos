@@ -50,6 +50,14 @@ The horizontal layout adds a minimap of the full set and a table of the last fou
 
 The closing summary shows the total duration, the grade counts, the best rep, the average height, and a comparison between the first five and the last five reps.
 
+## What the thresholds describe
+
+The counting thresholds in `config.py` describe a complete pull-up: full range of motion, elbow flexed to about 105 degrees at the top, and a head rise that reaches the hands' line. A repetition that does not meet them is not counted.
+
+The defaults were tuned on one athlete's sets and have not been tested on other athletes or camera setups yet. If a repetition that looks valid is missed, check the range and the rise in the video first. If it is still missed, the thresholds need a new profile in `config.py`.
+
+Calibration only grades reps that were already counted. It does not change what counts as a rep.
+
 ## Limits
 
 - One athlete per clip.
