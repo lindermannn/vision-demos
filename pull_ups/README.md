@@ -8,7 +8,11 @@ Run the commands below from this folder (`pull_ups`).
 |---|---|---|
 | Pull-ups | Counts reps, times each one, grades how high it goes against the athlete's own calibration, and renders a reel or horizontal analysis video | MediaPipe Pose (local) |
 
+[![20 reps, horizontal layout](readme_images/pullups-thumbnail.jpg)](https://www.youtube.com/watch?v=HACXz5mu7Yk)
+
 Sample video (20 reps, horizontal layout): [watch on YouTube](https://www.youtube.com/watch?v=HACXz5mu7Yk)
+
+[![Side view, 2 reps](readme_images/side-view-thumbnail.jpg)](https://youtu.be/L_C7bp-_LhI)
 
 Side-view example (2 reps, the only side-view clip checked so far): [watch on YouTube](https://youtu.be/L_C7bp-_LhI)
 
