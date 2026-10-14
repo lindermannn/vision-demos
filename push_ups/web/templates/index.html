@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Push-up Analyzer</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px;
+            background: #0a0c0e;
+            color: #e8eef4;
+        }
+        h1 { color: #00ff66; margin-bottom: 8px; }
+        .subtitle { color: #8a96a3; margin-bottom: 24px; }
+        .card {
+            background: #121417;
+            border: 1px solid #1f2124;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; font-weight: 500; }
+        select, input[type="file"] {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0a0c0e;
+            border: 1px solid #1f2124;
+            border-radius: 8px;
+            color: #e8eef4;
+            font-size: 14px;
+        }
+        select:focus, input:focus { outline: none; border-color: #00ff66; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; }
+        .checkbox-group input[type="checkbox"] { width: auto; }
+        button {
+            background: #00ff66;
+            color: #0a0c0e;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .loader { display: none; text-align: center; padding: 20px; }
+        .spinner {
+            border: 3px solid #1f2124;
+            border-top: 3px solid #00ff66;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .results { display: none; }
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        @media (max-width: 600px) { .result-grid { grid-template-columns: 1fr; } }
+        video {
+            width: 100%;
+            border-radius: 8px;
+            background: #0a0c0e;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .stat {
+            background: #0a0c0e;
+            border: 1px solid #1f2124;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-value { font-size: 24px; font-weight: 700; color: #00ff66; }
+        .stat-label { font-size: 12px; color: #8a96a3; text-transform: uppercase; }
+        .report { background: #0a0c0e; border: 1px solid #1f2124; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; white-space: pre-wrap; max-height: 300px; overflow: auto; }
+        .error { color: #ff6b6b; background: #2a0a0a; border: 1px solid #441; padding: 12px; border-radius: 8px; display: none; }
+        .reps-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .reps-table th, .reps-table td { padding: 8px; text-align: left; border-bottom: 1px solid #1f2124; }
+        .reps-table th { color: #8a96a3; font-weight: 500; }
+        .reps-table tr:hover { background: #1a1d21; }
+        .grade-rom_full_alto { color: #2fe0b0; }
+        .grade-rom_semi_alto { color: #5ab8ff; }
+        .grade-rom_full { color: #b4e35a; }
+        .grade-bajo_minimo { color: #ffb547; }
+        .grade-sin_medida { color: #8a96a3; }
+        .calib-link { color: #00ff66; text-decoration: none; }
+        .calib-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>🏋️ Push-up Analyzer</h1>
+    <p class="subtitle">Sube un video de flexiones → obtén análisis con skeleton, conteo y profundidad</p>
+
+    <div class="card">
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="video">Video (MP4, MOV, etc.)</label>
+                <input type="file" id="video" name="video" accept="video/*" required>
+            </div>
+
+            <div class="form-group">
+                <label for="layout">Layout de salida</label>
+                <select id="layout" name="layout">
+                    <option value="horizontal">Horizontal (1920×1080) — YouTube, análisis</option>
+                    <option value="reel">Reel vertical (1080×1920) — Instagram, TikTok</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="calibration">Calibración (opcional)</label>
+                <select id="calibration" name="calibration">
+                    <option value="">Sin calibración (solo conteo y timing)</option>
+                    {% for cal in calibrations %}
+                    <option value="{{ cal }}">{{ cal }}</option>
+                    {% endfor %}
+                </select>
+                <small style="color: #8a96a3;">Crea una en <a href="/calibrate.html" class="calib-link" target="_blank">/calibrate.html</a></small>
+            </div>
+
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="static_camera" name="static_camera">
+                <label for="static_camera" style="margin: 0;">Cámara estática confirmada (mejora referencia de profundidad)</label>
+            </div>
+
+            <button type="submit" id="submitBtn">Analizar video</button>
+        </form>
+
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Extrayendo pose y analizando... (puede tardar 30-120s)</p>
+        </div>
+
+        <div class="error" id="error"></div>
+    </div>
+
+    <div class="card results" id="results">
+        <h2 style="margin-top: 0;">Resultado</h2>
+
+        <div class="stats">
+            <div class="stat"><div class="stat-value" id="statReps">-</div><div class="stat-label">Reps</div></div>
+            <div class="stat"><div class="stat-value" id="statDuration">-</div><div class="stat-label">Duración (s)</div></div>
+            <div class="stat"><div class="stat-value" id="statMedian">-</div><div class="stat-label">Mediana rep (s)</div></div>
+            <div class="stat"><div class="stat-value" id="statCalib">-</div><div class="stat-label">Calibración</div></div>
+        </div>
+
+        <div class="result-grid">
+            <div>
+                <h3>Video analizado</h3>
+                <video id="resultVideo" controls></video>
+            </div>
+            <div>
+                <h3>Reporte</h3>
+                <div class="report" id="report"></div>
+            </div>
+        </div>
+
+        <h3 style="margin-top: 24px;">Detalle por rep</h3>
+        <table class="reps-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Inicio (s)</th>
+                    <th>Pico (s)</th>
+                    <th>Fin (s)</th>
+                    <th>ROM (°)</th>
+                    <th>Profundidad</th>
+                    <th>Grado</th>
+                    <th>Confianza</th>
+                </tr>
+            </thead>
+            <tbody id="repsTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const loader = document.getElementById('loader');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorDiv = document.getElementById('error');
+        const resultsDiv = document.getElementById('results');
+        const videoEl = document.getElementById('resultVideo');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            submitBtn.disabled = true;
+            loader.style.display = 'block';
+            errorDiv.style.display = 'none';
+            resultsDiv.style.display = 'none';
+
+            try {
+                const resp = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await resp.json();
+
+                if (!resp.ok) throw new Error(data.detail || 'Error desconocido');
+
+                // Fill stats
+                document.getElementById('statReps').textContent = data.reps?.length || 0;
+                if (data.run) {
+                    document.getElementById('statDuration').textContent = data.run.parameters?.maximum_duration_s || 'N/A';
+                }
+                if (data.reps?.length) {
+                    const durations = data.reps.map(r => r.end - r.start);
+                    const median = durations.sort((a,b)=>a-b)[Math.floor(durations.length/2)];
+                    document.getElementById('statMedian').textContent = median.toFixed(2);
+                }
+                document.getElementById('statCalib').textContent = data.run?.calibration || 'Ninguna';
+
+                // Video
+                if (data.video_url) {
+                    videoEl.src = data.video_url;
+                }
+
+                // Report
+                document.getElementById('report').textContent = data.report || 'Sin reporte';
+
+                // Reps table
+                const tbody = document.getElementById('repsTable');
+                tbody.innerHTML = '';
+                (data.reps || []).forEach((rep, i) => {
+                    const tr = document.createElement('tr');
+                    const gradeClass = rep.grade ? `grade-${rep.grade}` : '';
+                    tr.innerHTML = `
+                        <td>${i + 1}</td>
+                        <td>${rep.start?.toFixed(2) || '-'}</td>
+                        <td>${rep.peak?.toFixed(2) || '-'}</td>
+                        <td>${rep.end?.toFixed(2) || '-'}</td>
+                        <td>${rep.rom_degrees?.toFixed(1) || '-'}</td>
+                        <td>${rep.height_above_floor !== null ? rep.height_above_floor.toFixed(3) : '-'}</td>
+                        <td class="${gradeClass}">${rep.grade_label || rep.grade || '—'}</td>
+                        <td>${rep.confidence !== undefined ? (rep.confidence * 100).toFixed(0) + '%' : '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                resultsDiv.style.display = 'block';
+            } catch (err) {
+                errorDiv.textContent = err.message;
+                errorDiv.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
