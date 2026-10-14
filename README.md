@@ -5,6 +5,7 @@ Real-world computer vision demos. Each folder is a self-contained demo with its 
 | Project | What it does | Key model |
 |---|---|---|
 | [Pull-ups](pull_ups/) | Counts pull-up reps, times each one, and grades how high it goes against the athlete's own calibration | MediaPipe Pose (local) |
+| [Push-ups](push_ups/) | Counts reps on the return to plank, times each phase, and grades depth against the athlete's calibration | MediaPipe Pose (local) |
 | [Machinery vision tracker](machinery-vision-tracker/) | Detects mining machinery and estimates safety berm height from synthetic video. Two methods, with tests | YOLO11-seg, ByteTrack |
 
 ## Pull-ups
@@ -15,9 +16,14 @@ Sample output, 20 reps with grip changes: [watch on YouTube](https://www.youtube
 
 Setup, usage and limits are in [pull_ups/README.md](pull_ups/README.md) and [pull_ups/how_it_works.md](pull_ups/how_it_works.md).
 
+## Push-ups
+
+Setup, usage and limits are in [push_ups/README.md](push_ups/README.md) and [push_ups/how_it_works.md](push_ups/how_it_works.md).
+
 ## Licenses
 
 Each folder has its own license:
 
 - `pull_ups/`: Apache-2.0. See [LICENSE](LICENSE).
+- `push_ups/`: Apache-2.0. See [LICENSE](LICENSE).
 - `machinery-vision-tracker/`: AGPL-3.0. See [machinery-vision-tracker/LICENSE](machinery-vision-tracker/LICENSE).

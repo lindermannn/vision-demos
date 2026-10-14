@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Calibración - Push-up Analyzer</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px;
+            background: #0a0c0e;
+            color: #e8eef4;
+        }
+        h1 { color: #00ff66; margin-bottom: 8px; }
+        .subtitle { color: #8a96a3; margin-bottom: 24px; }
+        .card {
+            background: #121417;
+            border: 1px solid #1f2124;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; font-weight: 500; }
+        input, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0a0c0e;
+            border: 1px solid #1f2124;
+            border-radius: 8px;
+            color: #e8eef4;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        textarea { min-height: 300px; font-family: monospace; }
+        input:focus, textarea:focus { outline: none; border-color: #00ff66; }
+        button {
+            background: #00ff66;
+            color: #0a0c0e;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .secondary-btn { background: #1f2124; color: #e8eef4; margin-left: 10px; }
+        .loader { display: none; text-align: center; padding: 20px; }
+        .spinner {
+            border: 3px solid #1f2124;
+            border-top: 3px solid #00ff66;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .result { display: none; }
+        .output { background: #0a0c0e; border: 1px solid #1f2124; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; white-space: pre-wrap; max-height: 400px; overflow: auto; }
+        .error { color: #ff6b6b; background: #2a0a0a; border: 1px solid #441; padding: 12px; border-radius: 8px; display: none; }
+        .example { background: #0a0c0e; border: 1px solid #1f2124; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: #8a96a3; }
+        .field-desc { color: #8a96a3; font-size: 13px; margin-top: 4px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 16px; }
+    </style>
+</head>
+<body>
+    <h1>⚙️ Crear Calibración de Flexiones</h1>
+    <p class="subtitle">Sube un JSON de referencia con videos ya analizados para crear tu calibración personal</p>
+
+    <div class="card">
+        <h3>Formato del JSON de referencia</h3>
+        <div class="example">{
+  "name": "mis-flexiones",
+  "tolerance": 0.02,
+  "semi_fraction": 0.2,
+  "references": [
+    {
+      "clip": "flexiones-31-reps.mp4",
+      "alto": "1-5",
+      "minimo": "26-31",
+      "all_valid": true,
+      "static_camera": false
+    }
+  ]
+}</div>
+        <div class="field-desc">
+            <strong>alto:</strong> reps más profundas (ej. "1-5")<br>
+            <strong>minimo:</strong> reps válidas menos profundas (ej. "26-31")<br>
+            <strong>clip:</strong> nombre del archivo en data/input/<br>
+            <strong>static_camera:</strong> true si la cámara no se movió
+        </div>
+    </div>
+
+    <div class="card">
+        <form id="calibForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="reference">Archivo JSON de referencia</label>
+                <input type="file" id="reference" name="reference" accept=".json" required>
+            </div>
+            <div class="btn-group">
+                <button type="submit" id="submitBtn">Crear calibración</button>
+                <button type="button" class="secondary-btn" onclick="loadExample()">Cargar ejemplo</button>
+            </div>
+        </form>
+
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Procesando videos y construyendo calibración...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="card result" id="result">
+            <h3>Resultado</h3>
+            <div class="output" id="output"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('calibForm');
+        const loader = document.getElementById('loader');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorDiv = document.getElementById('error');
+        const resultDiv = document.getElementById('result');
+        const outputDiv = document.getElementById('output');
+
+        function loadExample() {
+            document.getElementById('reference').value = '';
+            const example = {
+                name: "mis-flexiones",
+                tolerance: 0.02,
+                semi_fraction: 0.2,
+                references: [
+                    {
+                        clip: "flexiones-31-reps.mp4",
+                        alto: "1-5",
+                        minimo: "26-31",
+                        all_valid: true,
+                        static_camera: false
+                    }
+                ]
+            };
+            // Create a file-like object
+            const blob = new Blob([JSON.stringify(example, null, 2)], {type: 'application/json'});
+            const file = new File([blob], 'reference-example.json', {type: 'application/json'});
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            document.getElementById('reference').files = dt.files;
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            submitBtn.disabled = true;
+            loader.style.display = 'block';
+            errorDiv.style.display = 'none';
+            resultDiv.style.display = 'none';
+
+            try {
+                const resp = await fetch('/calibrate', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await resp.json();
+
+                if (!resp.ok) throw new Error(data.detail || 'Error desconocido');
+
+                outputDiv.textContent = data.output || JSON.stringify(data, null, 2);
+                resultDiv.style.display = 'block';
+            } catch (err) {
+                errorDiv.textContent = err.message;
+                errorDiv.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

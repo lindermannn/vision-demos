@@ -1,0 +1,14 @@
+{
+  "name": "my-pushups",
+  "tolerance": 0.02,
+  "semi_fraction": 0.2,
+  "references": [
+    {
+      "clip": "../data/input/set-of-20.mp4",
+      "alto": "1-5",
+      "minimo": "16-20",
+      "all_valid": true,
+      "static_camera": true
+    }
+  ]
+}
